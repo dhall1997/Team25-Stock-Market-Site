@@ -1,0 +1,13 @@
+# Stock Market Site – Environment Setup
+
+This project contains the initial environment for a stock market website hosted on AWS.
+
+Folders:
+- frontend: static website files (S3)
+- backend: API code (EC2)
+- infrastructue: AWS architecture notes, CLI commands, IAM setup
+
+AWS services used (free tier):
+- IAM user for development
+- S3 bucket for frontend hosting
+- EC2 t2.micro instance for backend
