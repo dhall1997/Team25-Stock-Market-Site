@@ -1,12 +1,75 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="en">
 <head>
-  <title>Team 25 Stock Market Site</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team 25 Stock Market</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Team 25 Stock Market Dashboard</h1>
-  <pre id="stock-data">Loading...</pre>
-  <script src="script.js"></script>
+
+```
+<div class="login-container">
+
+    <!-- Login Screen -->
+    <div class="login-box" id="login-screen">
+        <h1>Team 25</h1>
+        <h2>Stock Market</h2>
+        <p class="login-subtitle">Sign in to your account</p>
+
+        <form id="login-form">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter your username" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter your password" required>
+
+            <button type="submit" class="primary-button">Sign In</button>
+        </form>
+
+        <p class="create-account">
+            Don't have an account?
+            <a href="#" id="create-account-link">Create Account</a>
+        </p>
+
+        <p id="login-message"></p>
+    </div>
+
+    <!-- Create Account Screen -->
+    <div class="login-box" id="create-account-screen" style="display: none;">
+        <h1>Team 25</h1>
+        <h2>Create Account</h2>
+        <p class="login-subtitle">Create your stock market account</p>
+
+        <form id="create-account-form">
+            <label for="full-name">Full Name</label>
+            <input type="text" id="full-name" placeholder="Enter your full name" required>
+
+            <label for="new-username">Username</label>
+            <input type="text" id="new-username" placeholder="Choose a username" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="Enter your email" required>
+
+            <label for="new-password">Password</label>
+            <input type="password" id="new-password" placeholder="Create a password" required>
+
+            <button type="submit" class="primary-button">Create Account</button>
+        </form>
+
+        <p class="create-account">
+            Already have an account?
+            <a href="#" id="back-to-login">Back to Login</a>
+        </p>
+
+        <p id="account-message"></p>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+```
+
 </body>
 </html>

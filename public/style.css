@@ -1,7 +1,103 @@
+* {
+  box-sizing: border-box;
+  }
+
 body {
-  font-family: Arial;
-  margin: 20px;
+margin: 0;
+font-family: Arial, Helvetica, sans-serif;
+background: #f4f6f8;
+color: #1f2933;
 }
-h1 {
-  color: #1a73e8;
+
+.login-container {
+min-height: 100vh;
+display: flex;
+justify-content: center;
+align-items: center;
+padding: 20px;
+}
+
+.login-box {
+width: 100%;
+max-width: 420px;
+background: white;
+padding: 40px;
+border-radius: 12px;
+box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.login-box h1 {
+margin: 0;
+text-align: center;
+font-size: 32px;
+}
+
+.login-box h2 {
+margin: 5px 0 10px;
+text-align: center;
+font-size: 24px;
+font-weight: normal;
+}
+
+.login-subtitle {
+text-align: center;
+color: #667085;
+margin-bottom: 30px;
+}
+
+.login-box label {
+display: block;
+margin-bottom: 6px;
+font-weight: bold;
+}
+
+.login-box input {
+width: 100%;
+padding: 12px;
+margin-bottom: 20px;
+border: 1px solid #cbd5e1;
+border-radius: 6px;
+font-size: 15px;
+}
+
+.login-box input:focus {
+outline: none;
+border-color: #2563eb;
+}
+
+.primary-button {
+width: 100%;
+padding: 12px;
+border: none;
+border-radius: 6px;
+background: #2563eb;
+color: white;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+}
+
+.primary-button:hover {
+background: #1d4ed8;
+}
+
+.create-account {
+text-align: center;
+margin-top: 25px;
+color: #667085;
+}
+
+.create-account a {
+color: #2563eb;
+text-decoration: none;
+font-weight: bold;
+}
+
+.create-account a:hover {
+text-decoration: underline;
+}
+
+#login-message {
+text-align: center;
+margin-top: 15px;
 }
