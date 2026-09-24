@@ -124,19 +124,66 @@
 </div>
 
     <div class="dashboard-section">
-        <h3>Portfolio</h3>
+    <h3>Portfolio</h3>
 
-        <p>Your stocks will appear here.</p>
-    </div>
+    <table class="portfolio-table">
+        <thead>
+            <tr>
+                <th>Stock</th>
+                <th>Shares</th>
+                <th>Current Price</th>
+                <th>Total Value</th>
+            </tr>
+        </thead>
 
-    <div class="dashboard-section">
-        <h3>Transactions</h3>
-
-        <p>Your transactions will appear here.</p>
-    </div>
-
+        <tbody id="portfolio-body">
+            <tr>
+                <td colspan="4">No stocks owned.</td>
+            </tr>
+        </tbody>
+    </table>
 </div>
 
+    <div class="dashboard-section">
+    <h3>Transactions</h3>
+
+    <table class="transaction-table">
+        <thead>
+            <tr>
+                <th>Stock</th>
+                <th>Type</th>
+                <th>Shares</th>
+                <th>Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+
+        <tbody id="transaction-body">
+            <tr>
+                <td colspan="5">No transactions yet.</td>
+            </tr>
+        </tbody>
+        </table> 
+</div>
+
+<div class="dashboard-section">
+    <h3>Deposit / Withdraw Cash</h3>
+
+    <label for="cash-amount">Amount</label>
+    <input type="number" id="cash-amount" min="0.01" step="0.01" placeholder="Enter amount">
+
+    <div class="trading-buttons">
+        <button type="button" class="primary-button" id="deposit-button">
+            Deposit
+        </button>
+
+        <button type="button" class="cancel-button" id="withdraw-button">
+            Withdraw
+        </button>
+    </div>
+
+    <p id="cash-message"></p>
+</div>
 
 </div>
 
