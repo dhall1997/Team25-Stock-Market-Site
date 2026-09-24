@@ -307,3 +307,14 @@ withdrawButton.addEventListener("click", function() {
     cashAmount.value = "";
 });
 
+const logoutButton = document.getElementById("logout-button");
+
+logoutButton.addEventListener("click", function() {
+    document.getElementById("dashboard-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "block";
+
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-message").textContent = "";
+});
+

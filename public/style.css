@@ -127,9 +127,10 @@ box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
 }
 
 .dashboard-header p {
-margin: 8px 0 0;
-font-size: 17px;
-opacity: 0.9;
+    margin: 10px 0 0;
+    font-size: 17px;
+    text-align: center;
+    opacity: 0.9;
 }
 
 .account-section,
@@ -155,6 +156,7 @@ padding: 20px;
 margin-right: 1%;
 background: #f4f6f8;
 border-radius: 8px;
+border: 1px solid #e5e7eb;
 }
 
 .account-box:last-child {
@@ -204,9 +206,10 @@ border-color: #2563eb;
 }
 
 .trading-buttons {
-display: flex;
-gap: 10px;
-margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
 }
 
 .trading-buttons button {
@@ -257,7 +260,7 @@ font-weight: bold;
 
 .portfolio-table th,
 .portfolio-table td {
-    padding: 12px;
+    padding: 14px;
     text-align: left;
     border-bottom: 1px solid #e5e7eb;
 }
@@ -265,6 +268,7 @@ font-weight: bold;
 .portfolio-table th {
     background: #f4f6f8;
     font-weight: bold;
+    color: #1f2933;
 }
 
 .portfolio-table td {
@@ -279,7 +283,7 @@ font-weight: bold;
 
 .transaction-table th,
 .transaction-table td {
-    padding: 12px;
+    padding: 14px;
     text-align: left;
     border-bottom: 1px solid #e5e7eb;
 }
@@ -287,9 +291,35 @@ font-weight: bold;
 .transaction-table th {
     background: #f4f6f8;
     font-weight: bold;
+    color: #1f2933;
 }
 
 .transaction-table td {
     color: #667085;
 }
+
+.dashboard-header {
+    position: relative;
+}
+
+.logout-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    border: 1px solid white;
+    border-radius: 6px;
+    background: transparent;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.logout-button:hover {
+    background: white;
+    color: #2563eb;
+}
+
+
 
