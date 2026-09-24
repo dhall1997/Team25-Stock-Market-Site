@@ -101,3 +101,151 @@ text-decoration: underline;
 text-align: center;
 margin-top: 15px;
 }
+
+/* Dashboard */
+
+.dashboard {
+width: 100%;
+max-width: 1000px;
+margin: 40px auto;
+padding: 30px;
+}
+
+.dashboard-header {
+background: #2563eb;
+color: white;
+padding: 30px 35px;
+border-radius: 12px;
+margin-bottom: 25px;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 32px;
+    text-align: center;
+}
+
+.dashboard-header p {
+margin: 8px 0 0;
+font-size: 17px;
+opacity: 0.9;
+}
+
+.account-section,
+.dashboard-section {
+background: white;
+padding: 25px;
+margin-bottom: 25px;
+border-radius: 12px;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.account-section h3,
+.dashboard-section h3 {
+margin-top: 0;
+font-size: 20px;
+}
+
+.account-box {
+display: inline-block;
+width: 48%;
+vertical-align: top;
+padding: 20px;
+margin-right: 1%;
+background: #f4f6f8;
+border-radius: 8px;
+}
+
+.account-box:last-child {
+margin-right: 0;
+}
+
+.account-box h4 {
+margin: 0 0 10px;
+color: #667085;
+font-size: 14px;
+}
+
+.account-box p {
+margin: 0;
+font-size: 26px;
+font-weight: bold;
+}
+
+.dashboard-section p {
+color: #667085;
+}
+
+/* Trading Form */
+
+.dashboard-section label {
+display: block;
+margin-top: 15px;
+margin-bottom: 6px;
+font-weight: bold;
+}
+
+.dashboard-section select,
+.dashboard-section input[type="number"] {
+width: 100%;
+max-width: 400px;
+padding: 12px;
+border: 1px solid #cbd5e1;
+border-radius: 6px;
+font-size: 15px;
+background: white;
+}
+
+.dashboard-section select:focus,
+.dashboard-section input[type="number"]:focus {
+outline: none;
+border-color: #2563eb;
+}
+
+.trading-buttons {
+display: flex;
+gap: 10px;
+margin-top: 20px;
+}
+
+.trading-buttons button {
+width: auto;
+padding: 12px 24px;
+}
+
+.sell-button {
+padding: 12px 24px;
+border: none;
+border-radius: 6px;
+background: #16a34a;
+color: white;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+}
+
+.sell-button:hover {
+background: #15803d;
+}
+
+.cancel-button {
+padding: 12px 24px;
+border: 1px solid #cbd5e1;
+border-radius: 6px;
+background: white;
+color: #1f2933;
+font-size: 16px;
+font-weight: bold;
+cursor: pointer;
+}
+
+.cancel-button:hover {
+background: #f4f6f8;
+}
+
+#trade-message {
+margin-top: 15px;
+font-weight: bold;
+}
+

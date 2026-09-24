@@ -9,67 +9,138 @@
 </head>
 <body>
 
-```
 <div class="login-container">
 
-    <!-- Login Screen -->
-    <div class="login-box" id="login-screen">
-        <h1>Team 25</h1>
-        <h2>Stock Market</h2>
-        <p class="login-subtitle">Sign in to your account</p>
+<!-- Login Screen -->
+<div class="login-box" id="login-screen">
+    <h1>Team 25</h1>
+    <h2>Stock Market</h2>
+    <p class="login-subtitle">Sign in to your account</p>
 
-        <form id="login-form">
-            <label for="username">Username</label>
-            <input type="text" id="username" placeholder="Enter your username" required>
+    <form id="login-form">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter your username" required>
 
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Enter your password" required>
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required>
 
-            <button type="submit" class="primary-button">Sign In</button>
-        </form>
+        <button type="submit" class="primary-button">Sign In</button>
+    </form>
 
-        <p class="create-account">
-            Don't have an account?
-            <a href="#" id="create-account-link">Create Account</a>
-        </p>
+    <p class="create-account">
+        Don't have an account?
+        <a href="#" id="create-account-link">Create Account</a>
+    </p>
 
-        <p id="login-message"></p>
+    <p id="login-message"></p>
+</div>
+
+<!-- Create Account Screen -->
+<div class="login-box" id="create-account-screen" style="display: none;">
+    <h1>Team 25</h1>
+    <h2>Create Account</h2>
+    <p class="login-subtitle">Create your stock market account</p>
+
+    <form id="create-account-form">
+        <label for="full-name">Full Name</label>
+        <input type="text" id="full-name" placeholder="Enter your full name" required>
+
+        <label for="new-username">Username</label>
+        <input type="text" id="new-username" placeholder="Choose a username" required>
+
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter your email" required>
+
+        <label for="new-password">Password</label>
+        <input type="password" id="new-password" placeholder="Create a password" required>
+
+        <button type="submit" class="primary-button">Create Account</button>
+    </form>
+
+    <p class="create-account">
+        Already have an account?
+        <a href="#" id="back-to-login">Back to Login</a>
+    </p>
+
+    <p id="account-message"></p>
+</div>
+
+<!-- Dashboard Screen -->
+<div class="dashboard" id="dashboard-screen" style="display: none;">
+
+   <div class="dashboard-header">
+    <div>
+        <h1>Team 25 Stock Market</h1>
+        <p>Welcome, <span id="dashboard-username"></span>!</p>
+    </div>
+</div>
+
+    <div class="account-section">
+        <h3>Account</h3>
+
+        <div class="account-box">
+            <h4>Cash Balance</h4>
+            <p id="cash-balance">$10,000.00</p>
+        </div>
+
+        <div class="account-box">
+            <h4>Portfolio Balance</h4>
+            <p id="portfolio-balance">$0.00</p>
+        </div>
     </div>
 
-    <!-- Create Account Screen -->
-    <div class="login-box" id="create-account-screen" style="display: none;">
-        <h1>Team 25</h1>
-        <h2>Create Account</h2>
-        <p class="login-subtitle">Create your stock market account</p>
+    <div class="dashboard-section">
+    <h3>Buy / Sell Stock</h3>
 
-        <form id="create-account-form">
-            <label for="full-name">Full Name</label>
-            <input type="text" id="full-name" placeholder="Enter your full name" required>
+    <label for="stock-select">Select Stock</label>
+    <select id="stock-select">
+        <option value="">Select a stock</option>
+        <option value="AAPL">Apple (AAPL)</option>
+        <option value="MSFT">Microsoft (MSFT)</option>
+        <option value="GOOGL">Alphabet (GOOGL)</option>
+        <option value="AMZN">Amazon (AMZN)</option>
+    </select>
 
-            <label for="new-username">Username</label>
-            <input type="text" id="new-username" placeholder="Choose a username" required>
+    <p>Current Market Price: <strong id="market-price">$0.00</strong></p>
 
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Enter your email" required>
+    <label for="stock-quantity">Quantity</label>
+    <input type="number" id="stock-quantity" min="1" placeholder="Enter number of shares">
 
-            <label for="new-password">Password</label>
-            <input type="password" id="new-password" placeholder="Create a password" required>
+    <div class="trading-buttons">
+        <button type="button" class="primary-button" id="buy-button">
+            Buy Stock
+        </button>
 
-            <button type="submit" class="primary-button">Create Account</button>
-        </form>
+        <button type="button" class="sell-button" id="sell-button">
+            Sell Stock
+        </button>
 
-        <p class="create-account">
-            Already have an account?
-            <a href="#" id="back-to-login">Back to Login</a>
-        </p>
+        <button type="button" class="cancel-button" id="cancel-button">
+            Cancel
+        </button>
+    </div>
 
-        <p id="account-message"></p>
+    <p id="trade-message"></p>
+</div>
+
+    <div class="dashboard-section">
+        <h3>Portfolio</h3>
+
+        <p>Your stocks will appear here.</p>
+    </div>
+
+    <div class="dashboard-section">
+        <h3>Transactions</h3>
+
+        <p>Your transactions will appear here.</p>
     </div>
 
 </div>
 
+
+</div>
+
 <script src="script.js"></script>
-```
 
 </body>
 </html>
