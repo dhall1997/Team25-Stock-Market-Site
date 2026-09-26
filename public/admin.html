@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Administrator - Stock Trading System</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+
+    <body>
+        <main class="dashboard">
+
+            <!-- ADMIN HEADER -->
+            <header class="dashboard-header">
+                <h1>STOCK TRADING SYSTEM</h1>
+                <p>ADMINISTRATION</p>
+
+                <button id="logoutBtn" class="logout-button">
+                    LOG OUT
+                </button>
+            </header>
+
+            <!-- STOCK CREATION -->
+            <section class="dashboard-section">
+                <h3>Stock Creation</h3>
+                <p>Create a new stock and add it to the trading system.</p>
+
+                <label for="companyName">Company Name</label>
+                <input type="text" id="companyName">
+
+                <label for="tickerSymbol">Ticker Symbol</label>
+                <input type="text" id="tickerSymbol">
+
+                <label for="stockVolume">Volume</label>
+                <input type="number" id="stockVolume">
+
+                <label for="initialPrice">Initial Price</label>
+                <input type="number" step="0.01" id="initialPrice">
+
+                <div class="trading-buttons">
+                    <button id="createStockBtn" class="primary-button">
+                        CREATE STOCK
+                    </button>
+                </div>
+
+                <p id="stockMessage"></p>
+            </section>
+
+            <!-- MARKET HOURS -->
+            <section class="dashboard-section">
+                <h3>Market Hours</h3>
+                <p>Configure the opening and closing times for the market.</p>
+
+                <label for="openTime">Opening Time</label>
+                <input type="time" id="openTime" value="07:00">
+
+                <label for="closeTime">Closing Time</label>
+                <input type="time" id="closeTime" value="17:00">
+
+                <div class="trading-buttons">
+                    <button id="updateHoursBtn" class="primary-button">
+                        UPDATE HOURS
+                    </button>
+                </div>
+
+                <p id="hoursMessage"></p>
+            </section>
+
+            <!-- MARKET SCHEDULE -->
+            <section class="dashboard-section">
+                <h3>Market Schedule</h3>
+                <p>Configure the regular trading days and holidays.</p>
+
+                <label for="tradingDays">Trading Days</label>
+                <input
+                    type="text"
+                    id="tradingDays"
+                    value="Monday - Friday"
+                >
+
+                <label for="holidays">Holidays</label>
+                <input type="text" id="holidays">
+
+                <div class="trading-buttons">
+                    <button id="updateScheduleBtn" class="primary-button">
+                        UPDATE SCHEDULE
+                    </button>
+                </div>
+
+                <p id="scheduleMessage"></p>
+            </section>
+
+        </main>
+
+        <script src="admin.js"></script>
+    </body>
+</html>
