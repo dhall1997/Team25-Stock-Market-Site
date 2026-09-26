@@ -1,3 +1,9 @@
+
+// -------------------------------
+// USER FUNCTIONALITY 
+// -------------------------------
+
+// Element references
 const loginForm = document.getElementById("login-form");
 const createAccountForm = document.getElementById("create-account-form");
 
@@ -7,50 +13,63 @@ const dashboardScreen = document.getElementById("dashboard-screen");
 
 const createAccountLink = document.getElementById("create-account-link");
 const backToLogin = document.getElementById("back-to-login");
+const logoutButton = document.getElementById("logout-button");
 
+// -------------------------------
+// LOGIN
+// -------------------------------
 loginForm.addEventListener("submit", function(event) {
-event.preventDefault();
+    event.preventDefault();
 
+    const username = document.getElementById("username").value;
+    document.getElementById("dashboard-username").textContent = username;
 
-const username = document.getElementById("username").value;
-
-document.getElementById("dashboard-username").textContent = username;
-
-loginScreen.style.display = "none";
-dashboardScreen.style.display = "block";
-
-
+    loginScreen.style.display = "none";
+    dashboardScreen.style.display = "block";
 });
 
+// -------------------------------
+// SCREEN SWITCHING
+// -------------------------------
 createAccountLink.addEventListener("click", function(event) {
-event.preventDefault();
-
-
-loginScreen.style.display = "none";
-createAccountScreen.style.display = "block";
-
-
+    event.preventDefault();
+    loginScreen.style.display = "none";
+    createAccountScreen.style.display = "block";
 });
 
 backToLogin.addEventListener("click", function(event) {
-event.preventDefault();
-
-
-createAccountScreen.style.display = "none";
-loginScreen.style.display = "block";
-
-
+    event.preventDefault();
+    createAccountScreen.style.display = "none";
+    loginScreen.style.display = "block";
 });
 
+// -------------------------------
+// CREATE ACCOUNT
+// -------------------------------
 createAccountForm.addEventListener("submit", function(event) {
-event.preventDefault();
+    event.preventDefault();
 
-const fullName = document.getElementById("full-name").value;
+    const fullName = document.getElementById("full-name").value;
 
-document.getElementById("account-message").textContent =
-    "Account created for " + fullName + "!";
-
+    document.getElementById("account-message").textContent =
+        "Account created for " + fullName + "!";
 });
+
+// -------------------------------
+// LOGOUT
+// -------------------------------
+logoutButton.addEventListener("click", function() {
+    dashboardScreen.style.display = "none";
+    loginScreen.style.display = "block";
+
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-message").textContent = "";
+});
+
+// -------------------------------
+//  STOCK CODE 
+// -------------------------------
 
 const stockSelect = document.getElementById("stock-select");
 const marketPrice = document.getElementById("market-price");
@@ -94,19 +113,19 @@ buyButton.addEventListener("click", function() {
     const total = price * quantity;
 
     if (total > cashBalance) {
-    tradeMessage.textContent = "Not enough cash to complete this purchase.";
-    return;
-}
+        tradeMessage.textContent = "Not enough cash to complete this purchase.";
+        return;
+    }
 
     cashBalance -= total;
-      document.getElementById("cash-balance").textContent =
+    document.getElementById("cash-balance").textContent =
         "$" + cashBalance.toFixed(2);
 
-      tradeMessage.textContent =
+    tradeMessage.textContent =
         "Bought " + quantity + " shares of " + selectedStock +
         " for $" + total.toFixed(2) + ".";
 
-            if (portfolio[selectedStock]) {
+    if (portfolio[selectedStock]) {
         portfolio[selectedStock] += quantity;
     } else {
         portfolio[selectedStock] = quantity;
@@ -114,7 +133,7 @@ buyButton.addEventListener("click", function() {
 
     updatePortfolio();
 
-        transactions.push({
+    transactions.push({
         stock: selectedStock,
         type: "Buy",
         shares: quantity,
@@ -144,7 +163,7 @@ sellButton.addEventListener("click", function() {
     const price = stockPrices[selectedStock];
     const total = price * quantity;
 
-        tradeMessage.textContent =
+    tradeMessage.textContent =
         "Sold " + quantity + " shares of " + selectedStock +
         " for $" + total.toFixed(2) + ".";
 
@@ -160,9 +179,9 @@ sellButton.addEventListener("click", function() {
 
     portfolio[selectedStock] -= quantity;
 
-      cashBalance += total;
+    cashBalance += total;
     document.getElementById("cash-balance").textContent =
-      "$" + cashBalance.toFixed(2);
+        "$" + cashBalance.toFixed(2);
 
     if (portfolio[selectedStock] === 0) {
         delete portfolio[selectedStock];
@@ -170,7 +189,7 @@ sellButton.addEventListener("click", function() {
 
     updatePortfolio();
 
-        transactions.push({
+    transactions.push({
         stock: selectedStock,
         type: "Sell",
         shares: quantity,
@@ -229,13 +248,13 @@ function updatePortfolio() {
     const stocks = Object.keys(portfolio);
 
     if (stocks.length === 0) {
-    portfolioBody.innerHTML =
-        '<tr><td colspan="4">No stocks owned.</td></tr>';
+        portfolioBody.innerHTML =
+            '<tr><td colspan="4">No stocks owned.</td></tr>';
 
-    document.getElementById("portfolio-balance").textContent = "$0.00";
+        document.getElementById("portfolio-balance").textContent = "$0.00";
 
-    return;
-}
+        return;
+    }
 
     stocks.forEach(function(stock) {
         const shares = portfolio[stock];
@@ -255,7 +274,7 @@ function updatePortfolio() {
         portfolioBody.appendChild(row);
     });
 
-        document.getElementById("portfolio-balance").textContent =
+    document.getElementById("portfolio-balance").textContent =
         "$" + portfolioValue.toFixed(2);
 }
 
@@ -306,15 +325,3 @@ withdrawButton.addEventListener("click", function() {
 
     cashAmount.value = "";
 });
-
-const logoutButton = document.getElementById("logout-button");
-
-logoutButton.addEventListener("click", function() {
-    document.getElementById("dashboard-screen").style.display = "none";
-    document.getElementById("login-screen").style.display = "block";
-
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
-    document.getElementById("login-message").textContent = "";
-});
-
