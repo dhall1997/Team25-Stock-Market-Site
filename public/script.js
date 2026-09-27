@@ -18,11 +18,25 @@ const logoutButton = document.getElementById("logout-button");
 // -------------------------------
 // LOGIN
 // -------------------------------
+
 loginForm.addEventListener("submit", function(event) {
     event.preventDefault();
 
     const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    const savedUsername = localStorage.getItem("stockMarketUsername");
+    const savedPassword = localStorage.getItem("stockMarketPassword");
+
+    if (username !== savedUsername || password !== savedPassword) {
+        document.getElementById("login-message").textContent =
+            "Incorrect username or password.";
+        return;
+    }
+
     document.getElementById("dashboard-username").textContent = username;
+
+    document.getElementById("login-message").textContent = "";
 
     loginScreen.style.display = "none";
     dashboardScreen.style.display = "block";
@@ -46,13 +60,21 @@ backToLogin.addEventListener("click", function(event) {
 // -------------------------------
 // CREATE ACCOUNT
 // -------------------------------
+
 createAccountForm.addEventListener("submit", function(event) {
     event.preventDefault();
 
     const fullName = document.getElementById("full-name").value;
+    const username = document.getElementById("new-username").value;
+    const password = document.getElementById("new-password").value;
+
+    localStorage.setItem("stockMarketUsername", username);
+    localStorage.setItem("stockMarketPassword", password);
 
     document.getElementById("account-message").textContent =
         "Account created for " + fullName + "!";
+
+    createAccountForm.reset();
 });
 
 // -------------------------------
@@ -299,6 +321,16 @@ depositButton.addEventListener("click", function() {
     cashMessage.textContent =
         "Deposited $" + amount.toFixed(2) + ".";
 
+    transactions.push({
+        stock: "Cash",
+        type: "Deposit",
+        shares: "-",
+        price: 0,
+        total: amount
+    });
+
+    updateTransactions();
+
     cashAmount.value = "";
 });
 
@@ -323,5 +355,16 @@ withdrawButton.addEventListener("click", function() {
     cashMessage.textContent =
         "Withdrew $" + amount.toFixed(2) + ".";
 
+    transactions.push({
+        stock: "Cash",
+        type: "Withdrawal",
+        shares: "-",
+        price: 0,
+        total: amount
+    });
+
+    updateTransactions();
+
     cashAmount.value = "";
 });
+
