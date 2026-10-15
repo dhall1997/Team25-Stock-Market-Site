@@ -96,22 +96,100 @@ logoutButton.addEventListener("click", function() {
 const stockSelect = document.getElementById("stock-select");
 const marketPrice = document.getElementById("market-price");
 
-const stockPrices = {
-    AAPL: 150.00,
-    MSFT: 420.00,
-    GOOGL: 180.00,
-    AMZN: 230.00
-};
-
-stockSelect.addEventListener("change", function() {
+function updateStockPrice() {
     const selectedStock = stockSelect.value;
 
-    if (selectedStock) {
-        marketPrice.textContent = "$" + stockPrices[selectedStock].toFixed(2);
+    if (selectedStock && stockPrices[selectedStock] !== undefined) {
+        marketPrice.textContent =
+            "$" + stockPrices[selectedStock].toFixed(2);
     } else {
         marketPrice.textContent = "$0.00";
     }
-});
+}
+
+
+
+const stockPrices = {
+    AAPL: 225.00,
+    MSFT: 510.00,
+    GOOGL: 245.00,
+    AMZN: 220.00
+};
+
+let stocks = [];
+
+async function loadStocks() {
+    try {
+        const response = await fetch('/stocks');
+
+        if (!response.ok) {
+            throw new Error('Could not load stocks');
+        }
+
+        stocks = await response.json();
+
+        stocks.forEach((stock) => {
+            stockPrices[stock.ticker] = stock.price;
+        });
+
+        updateStockDropdown();
+        updateStockMarketTable();
+
+    }catch (error) {
+        console.error('Error loading stocks:', error);
+    }
+}
+
+function updateStockMarketTable() {
+    const stockMarketBody = document.getElementById('stock-market-body');
+
+    if (!stockMarketBody) {
+        return;
+    }
+
+    stockMarketBody.innerHTML = '';
+
+    stocks.forEach((stock) => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+            <td>${stock.company}</td>
+            <td>${stock.ticker}</td>
+            <td>$${stock.price.toFixed(2)}</td>
+            <td>${Number(stock.volume).toLocaleString('en-US')}</td>
+            <td>$${Number(stock.marketCap).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}</td>
+            <td>$${stock.openingPrice.toFixed(2)}</td>
+            <td>$${stock.high.toFixed(2)}</td>
+            <td>$${stock.low.toFixed(2)}</td>
+        `;
+
+        stockMarketBody.appendChild(row);
+    });
+}
+
+function updateStockDropdown() {
+    const selectedValue = stockSelect.value;
+
+    stockSelect.innerHTML = '<option value="">Select a stock</option>';
+
+    stocks.forEach((stock) => {
+        const option = document.createElement('option');
+        option.value = stock.ticker;
+        option.textContent = `${stock.company} (${stock.ticker})`;
+        stockSelect.appendChild(option);
+    });
+
+    if (stocks.some((stock) => stock.ticker === selectedValue)) {
+        stockSelect.value = selectedValue;
+    }
+
+    updateStockPrice();
+}
+
+stockSelect.addEventListener("change", updateStockPrice);
 
 const buyButton = document.getElementById("buy-button");
 const tradeMessage = document.getElementById("trade-message");
@@ -367,4 +445,7 @@ withdrawButton.addEventListener("click", function() {
 
     cashAmount.value = "";
 });
+
+loadStocks();
+setInterval(loadStocks, 10000);
 
