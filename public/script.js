@@ -19,27 +19,53 @@ const logoutButton = document.getElementById("logout-button");
 // LOGIN
 // -------------------------------
 
-loginForm.addEventListener("submit", function(event) {
+loginForm.addEventListener("submit", async function(event) {
     event.preventDefault();
 
-    const username = document.getElementById("username").value;
+    const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
+    const loginMessage = document.getElementById("login-message");
 
-    const savedUsername = localStorage.getItem("stockMarketUsername");
-    const savedPassword = localStorage.getItem("stockMarketPassword");
+    loginMessage.textContent = "";
 
-    if (username !== savedUsername || password !== savedPassword) {
-        document.getElementById("login-message").textContent =
-            "Incorrect username or password.";
-        return;
+    try {
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            loginMessage.textContent =
+                data.error || "Login failed.";
+            return;
+        }
+
+        // Send administrators to the admin portal.
+        if (data.role === "admin") {
+            window.location.href = "/admin.html";
+            return;
+        }
+
+        // Regular users stay on the customer dashboard.
+        document.getElementById("dashboard-username").textContent =
+            data.username;
+
+        loginScreen.style.display = "none";
+        dashboardScreen.style.display = "block";
+
+    } catch (error) {
+        console.error("Login error:", error);
+        loginMessage.textContent =
+            "Unable to connect to the server.";
     }
-
-    document.getElementById("dashboard-username").textContent = username;
-
-    document.getElementById("login-message").textContent = "";
-
-    loginScreen.style.display = "none";
-    dashboardScreen.style.display = "block";
 });
 
 // -------------------------------
@@ -109,12 +135,38 @@ function updateStockPrice() {
 
 
 
-const stockPrices = {
-    AAPL: 225.00,
-    MSFT: 510.00,
-    GOOGL: 245.00,
-    AMZN: 220.00
-};
+let stockPrices = {};
+
+async function loadStocks() {
+    try {
+        const response = await fetch("/stocks");
+
+        if (!response.ok) {
+            throw new Error("Unable to load stocks.");
+        }
+
+        const stocks = await response.json();
+
+        stockSelect.innerHTML =
+            '<option value="">Select a stock</option>';
+
+        stocks.forEach(function(stock) {
+            stockPrices[stock.ticker] = stock.price;
+
+            const option = document.createElement("option");
+            option.value = stock.ticker;
+            option.textContent =
+                stock.company + " (" + stock.ticker + ")";
+
+            stockSelect.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error("Error loading stocks:", error);
+    }
+}
+
+loadStocks();
 
 let stocks = [];
 
@@ -449,3 +501,44 @@ withdrawButton.addEventListener("click", function() {
 loadStocks();
 setInterval(loadStocks, 10000);
 
+loginForm.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    const loginMessage = document.getElementById("login-message");
+
+    try {
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            loginMessage.textContent = data.error;
+            return;
+        }
+
+        if (data.role === "admin") {
+            window.location.href = "/admin.html";
+            return;
+        }
+
+        document.getElementById("dashboard-username").textContent =
+            data.username;
+
+        loginScreen.style.display = "none";
+        dashboardScreen.style.display = "block";
+
+    } catch (error) {
+        loginMessage.textContent = "Unable to connect to the server.";
+    }
+});

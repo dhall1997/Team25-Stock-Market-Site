@@ -4,6 +4,19 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
+// Temporary users for development
+const users = [
+  {
+    username: 'admin',
+    password: 'admin123',
+    role: 'admin'
+  },
+  {
+    username: 'user',
+    password: 'user123',
+    role: 'user'
+  }
+];
 
 app.use(cors());
 app.use(express.json());
@@ -64,6 +77,28 @@ setInterval(() => {
     stock.low = Math.min(stock.low, stock.price);
   });
 }, 10000);
+
+// Authenticate a user.
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  const user = users.find(
+    (account) =>
+      account.username === username &&
+      account.password === password
+  );
+
+  if (!user) {
+    return res.status(401).json({
+      error: 'Invalid username or password.'
+    });
+  }
+
+  res.json({
+    username: user.username,
+    role: user.role
+  });
+});
 
 // Return all stocks.
 app.get('/stocks', (req, res) => {

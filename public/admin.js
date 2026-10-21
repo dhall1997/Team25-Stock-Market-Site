@@ -27,9 +27,7 @@ const scheduleMessage = document.getElementById("scheduleMessage");
 // STOCK CREATION
 // -------------------------------
 
-let stocks = [];
-
-createStockBtn.addEventListener("click", function() {
+createStockBtn.addEventListener("click", async function() {
     const company = companyName.value.trim();
     const ticker = tickerSymbol.value.trim().toUpperCase();
     const volume = Number(stockVolume.value);
@@ -53,72 +51,46 @@ createStockBtn.addEventListener("click", function() {
         return;
     }
 
-    const tickerExists = stocks.some(function(stock) {
-        return stock.ticker === ticker;
-    });
+    try {
+        const response = await fetch("/stocks", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                company: company,
+                ticker: ticker,
+                volume: volume,
+                price: price
+            })
+        });
 
-    if (tickerExists) {
+        const data = await response.json();
+
+        if (!response.ok) {
+            stockMessage.textContent =
+                data.error || "Unable to create stock.";
+            return;
+        }
+
         stockMessage.textContent =
-            "A stock with that ticker symbol already exists.";
-        return;
+            data.company + " (" + data.ticker +
+            ") created successfully.";
+
+        companyName.value = "";
+        tickerSymbol.value = "";
+        stockVolume.value = "";
+        initialPrice.value = "";
+
+        console.log("Stock created:", data);
+
+    } catch (error) {
+        console.error(error);
+
+        stockMessage.textContent =
+            "Unable to connect to the server.";
     }
-
-    const newStock = {
-        company: company,
-        ticker: ticker,
-        volume: volume,
-        price: price
-    };
-
-    stocks.push(newStock);
-
-    stockMessage.textContent =
-        company + " (" + ticker + ") created successfully.";
-
-    companyName.value = "";
-    tickerSymbol.value = "";
-    stockVolume.value = "";
-    initialPrice.value = "";
-
-    console.log(stocks);
 });
-
-
-// -------------------------------
-// MARKET HOURS
-// -------------------------------
-
-let marketHours = {
-    open: "07:00",
-    close: "17:00"
-};
-
-updateHoursBtn.addEventListener("click", function() {
-    const opening = openTime.value;
-    const closing = closeTime.value;
-
-    if (!opening || !closing) {
-        hoursMessage.textContent =
-            "Please enter an opening and closing time.";
-        return;
-    }
-
-    if (opening >= closing) {
-        hoursMessage.textContent =
-            "Opening time must be before closing time.";
-        return;
-    }
-
-    marketHours.open = opening;
-    marketHours.close = closing;
-
-    hoursMessage.textContent =
-        "Market hours updated to " +
-        opening + " - " + closing + ".";
-
-    console.log(marketHours);
-});
-
 
 // -------------------------------
 // MARKET SCHEDULE
