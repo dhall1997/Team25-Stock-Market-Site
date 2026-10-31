@@ -61,6 +61,8 @@ loginForm.addEventListener("submit", async function(event) {
         loginScreen.style.display = "none";
         dashboardScreen.style.display = "block";
 
+        await loadAccountData();
+
     } catch (error) {
         console.error("Login error:", error);
         loginMessage.textContent =
@@ -87,26 +89,61 @@ backToLogin.addEventListener("click", function(event) {
 // CREATE ACCOUNT
 // -------------------------------
 
-createAccountForm.addEventListener("submit", function(event) {
+createAccountForm.addEventListener("submit", async function(event) {
     event.preventDefault();
 
-    const fullName = document.getElementById("full-name").value;
-    const username = document.getElementById("new-username").value;
+    const fullName = document.getElementById("full-name").value.trim();
+    const username = document.getElementById("new-username").value.trim();
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("new-password").value;
 
-    localStorage.setItem("stockMarketUsername", username);
-    localStorage.setItem("stockMarketPassword", password);
+    const accountMessage = document.getElementById("account-message");
 
-    document.getElementById("account-message").textContent =
-        "Account created for " + fullName + "!";
+    try {
+        const response = await fetch("/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                fullName: fullName,
+                username: username,
+                email: email,
+                password: password
+            })
+        });
 
-    createAccountForm.reset();
+        const data = await response.json();
+
+        if (!response.ok) {
+            accountMessage.textContent = data.error || "Unable to create account.";
+            return;
+        }
+
+        accountMessage.textContent =
+            "Account created successfully! You can now log in.";
+
+        createAccountForm.reset();
+
+    } catch (error) {
+        console.error("Account creation error:", error);
+        accountMessage.textContent =
+            "Unable to connect to the server. Please try again.";
+    }
 });
 
 // -------------------------------
 // LOGOUT
 // -------------------------------
-logoutButton.addEventListener("click", function() {
+logoutButton.addEventListener("click", async function() {
+    try {
+        await fetch("/logout", {
+            method: "POST"
+        });
+    } catch (error) {
+        console.error("Logout error:", error);
+    }
+
     dashboardScreen.style.display = "none";
     loginScreen.style.display = "block";
 
@@ -137,36 +174,6 @@ function updateStockPrice() {
 
 let stockPrices = {};
 
-async function loadStocks() {
-    try {
-        const response = await fetch("/stocks");
-
-        if (!response.ok) {
-            throw new Error("Unable to load stocks.");
-        }
-
-        const stocks = await response.json();
-
-        stockSelect.innerHTML =
-            '<option value="">Select a stock</option>';
-
-        stocks.forEach(function(stock) {
-            stockPrices[stock.ticker] = stock.price;
-
-            const option = document.createElement("option");
-            option.value = stock.ticker;
-            option.textContent =
-                stock.company + " (" + stock.ticker + ")";
-
-            stockSelect.appendChild(option);
-        });
-
-    } catch (error) {
-        console.error("Error loading stocks:", error);
-    }
-}
-
-loadStocks();
 
 let stocks = [];
 
@@ -247,7 +254,11 @@ const buyButton = document.getElementById("buy-button");
 const tradeMessage = document.getElementById("trade-message");
 const stockQuantity = document.getElementById("stock-quantity");
 
-buyButton.addEventListener("click", function() {
+// -------------------------------
+// BUY STOCK
+// -------------------------------
+
+buyButton.addEventListener("click", async function() {
     const selectedStock = stockSelect.value;
     const quantity = Number(stockQuantity.value);
 
@@ -256,49 +267,48 @@ buyButton.addEventListener("click", function() {
         return;
     }
 
-    if (!quantity || quantity < 1) {
-        tradeMessage.textContent = "Please enter a valid quantity.";
+    if (!Number.isSafeInteger(quantity) || quantity < 1) {
+        tradeMessage.textContent = "Please enter a valid whole number of shares.";
         return;
     }
 
-    const price = stockPrices[selectedStock];
-    const total = price * quantity;
+    try {
+        const response = await fetch("/trade/buy", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                ticker: selectedStock,
+                shares: quantity
+            })
+        });
 
-    if (total > cashBalance) {
-        tradeMessage.textContent = "Not enough cash to complete this purchase.";
-        return;
+        const data = await response.json();
+
+        if (!response.ok) {
+            tradeMessage.textContent = data.error || "Purchase failed.";
+            return;
+        }
+
+        await loadAccountData();
+
+        tradeMessage.textContent = data.message;
+        stockQuantity.value = "";
+
+    } catch (error) {
+        console.error("Purchase error:", error);
+        tradeMessage.textContent = "Unable to complete purchase.";
     }
-
-    cashBalance -= total;
-    document.getElementById("cash-balance").textContent =
-        "$" + cashBalance.toFixed(2);
-
-    tradeMessage.textContent =
-        "Bought " + quantity + " shares of " + selectedStock +
-        " for $" + total.toFixed(2) + ".";
-
-    if (portfolio[selectedStock]) {
-        portfolio[selectedStock] += quantity;
-    } else {
-        portfolio[selectedStock] = quantity;
-    }
-
-    updatePortfolio();
-
-    transactions.push({
-        stock: selectedStock,
-        type: "Buy",
-        shares: quantity,
-        price: price,
-        total: total
-    });
-
-    updateTransactions();
 });
+
+// -------------------------------
+// SELL STOCK
+// -------------------------------
 
 const sellButton = document.getElementById("sell-button");
 
-sellButton.addEventListener("click", function() {
+sellButton.addEventListener("click", async function() {
     const selectedStock = stockSelect.value;
     const quantity = Number(stockQuantity.value);
 
@@ -307,49 +317,39 @@ sellButton.addEventListener("click", function() {
         return;
     }
 
-    if (!quantity || quantity < 1) {
-        tradeMessage.textContent = "Please enter a valid quantity.";
+    if (!Number.isSafeInteger(quantity) || quantity < 1) {
+        tradeMessage.textContent = "Please enter a valid whole number of shares.";
         return;
     }
 
-    const price = stockPrices[selectedStock];
-    const total = price * quantity;
+    try {
+        const response = await fetch("/trade/sell", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                ticker: selectedStock,
+                shares: quantity
+            })
+        });
 
-    tradeMessage.textContent =
-        "Sold " + quantity + " shares of " + selectedStock +
-        " for $" + total.toFixed(2) + ".";
+        const data = await response.json();
 
-    if (!portfolio[selectedStock]) {
-        tradeMessage.textContent = "You do not own any " + selectedStock + " shares.";
-        return;
+        if (!response.ok) {
+            tradeMessage.textContent = data.error || "Sale failed.";
+            return;
+        }
+
+        await loadAccountData();
+
+        tradeMessage.textContent = data.message;
+        stockQuantity.value = "";
+
+    } catch (error) {
+        console.error("Sale error:", error);
+        tradeMessage.textContent = "Unable to complete sale.";
     }
-
-    if (quantity > portfolio[selectedStock]) {
-        tradeMessage.textContent = "You do not own enough " + selectedStock + " shares.";
-        return;
-    }
-
-    portfolio[selectedStock] -= quantity;
-
-    cashBalance += total;
-    document.getElementById("cash-balance").textContent =
-        "$" + cashBalance.toFixed(2);
-
-    if (portfolio[selectedStock] === 0) {
-        delete portfolio[selectedStock];
-    }
-
-    updatePortfolio();
-
-    transactions.push({
-        stock: selectedStock,
-        type: "Sell",
-        shares: quantity,
-        price: price,
-        total: total
-    });
-
-    updateTransactions();
 });
 
 const cancelButton = document.getElementById("cancel-button");
@@ -429,116 +429,129 @@ function updatePortfolio() {
     document.getElementById("portfolio-balance").textContent =
         "$" + portfolioValue.toFixed(2);
 }
+    // -------------------------------
+// LOAD ACCOUNT DATA FROM DATABASE
+// -------------------------------
+
+async function loadAccountData() {
+    try {
+        const response = await fetch("/account-data");
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Unable to load account data.");
+        }
+
+        cashBalance = data.cashBalance;
+
+        portfolio = {};
+
+        data.holdings.forEach(function(holding) {
+            portfolio[holding.ticker] = holding.sharesOwned;
+            stockPrices[holding.ticker] = holding.currentPrice;
+        });
+
+        transactions = data.transactions.map(function(transaction) {
+            return {
+                stock: transaction.stock,
+                type: transaction.type.charAt(0).toUpperCase() +
+                      transaction.type.slice(1),
+                shares: transaction.shares,
+                price: transaction.price,
+                total: transaction.total
+            };
+        });
+
+        document.getElementById("cash-balance").textContent =
+            "$" + cashBalance.toFixed(2);
+
+        updatePortfolio();
+        updateTransactions();
+
+    } catch (error) {
+        console.error("Account data error:", error);
+        tradeMessage.textContent = error.message;
+    }
+}
 
 const cashAmount = document.getElementById("cash-amount");
 const depositButton = document.getElementById("deposit-button");
 const withdrawButton = document.getElementById("withdraw-button");
 const cashMessage = document.getElementById("cash-message");
 
-depositButton.addEventListener("click", function() {
+depositButton.addEventListener("click", async function() {
     const amount = Number(cashAmount.value);
 
-    if (!amount || amount <= 0) {
+    if (!Number.isFinite(amount) || amount <= 0) {
         cashMessage.textContent = "Please enter a valid amount.";
         return;
     }
-
-    cashBalance += amount;
-
-    document.getElementById("cash-balance").textContent =
-        "$" + cashBalance.toFixed(2);
-
-    cashMessage.textContent =
-        "Deposited $" + amount.toFixed(2) + ".";
-
-    transactions.push({
-        stock: "Cash",
-        type: "Deposit",
-        shares: "-",
-        price: 0,
-        total: amount
-    });
-
-    updateTransactions();
-
-    cashAmount.value = "";
-});
-
-withdrawButton.addEventListener("click", function() {
-    const amount = Number(cashAmount.value);
-
-    if (!amount || amount <= 0) {
-        cashMessage.textContent = "Please enter a valid amount.";
-        return;
-    }
-
-    if (amount > cashBalance) {
-        cashMessage.textContent = "You do not have enough cash.";
-        return;
-    }
-
-    cashBalance -= amount;
-
-    document.getElementById("cash-balance").textContent =
-        "$" + cashBalance.toFixed(2);
-
-    cashMessage.textContent =
-        "Withdrew $" + amount.toFixed(2) + ".";
-
-    transactions.push({
-        stock: "Cash",
-        type: "Withdrawal",
-        shares: "-",
-        price: 0,
-        total: amount
-    });
-
-    updateTransactions();
-
-    cashAmount.value = "";
-});
-
-loadStocks();
-setInterval(loadStocks, 10000);
-
-loginForm.addEventListener("submit", async function(event) {
-    event.preventDefault();
-
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-    const loginMessage = document.getElementById("login-message");
 
     try {
-        const response = await fetch("/login", {
+        const response = await fetch("/cash/deposit", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                username: username,
-                password: password
-            })
+            body: JSON.stringify({ amount: amount })
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-            loginMessage.textContent = data.error;
+            cashMessage.textContent = data.error || "Deposit failed.";
             return;
         }
 
-        if (data.role === "admin") {
-            window.location.href = "/admin.html";
-            return;
-        }
+        await loadAccountData();
 
-        document.getElementById("dashboard-username").textContent =
-            data.username;
+        cashMessage.textContent =
+            "Deposited $" + amount.toFixed(2) + ".";
 
-        loginScreen.style.display = "none";
-        dashboardScreen.style.display = "block";
+        cashAmount.value = "";
 
     } catch (error) {
-        loginMessage.textContent = "Unable to connect to the server.";
+        console.error("Deposit error:", error);
+        cashMessage.textContent = "Unable to process deposit.";
     }
 });
+
+withdrawButton.addEventListener("click", async function() {
+    const amount = Number(cashAmount.value);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+        cashMessage.textContent = "Please enter a valid amount.";
+        return;
+    }
+
+    try {
+        const response = await fetch("/cash/withdraw", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ amount: amount })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            cashMessage.textContent = data.error || "Withdrawal failed.";
+            return;
+        }
+
+        await loadAccountData();
+
+        cashMessage.textContent =
+            "Withdrew $" + amount.toFixed(2) + ".";
+
+        cashAmount.value = "";
+
+    } catch (error) {
+        console.error("Withdrawal error:", error);
+        cashMessage.textContent = "Unable to process withdrawal.";
+    }
+});
+
+loadStocks();
+setInterval(loadStocks, 10000);

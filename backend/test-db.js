@@ -2,24 +2,34 @@ require("dotenv").config();
 const { Pool } = require("pg");
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
 });
 
-async function testConnection() {
-  try {
-    const result = await pool.query(
-      "SELECT current_database() AS database, NOW() AS connected_at"
-    );
+async function checkTransactions() {
+    try {
+        const result = await pool.query(`
+            SELECT
+                u.username,
+                s.ticker,
+                t.transaction_type,
+                t.shares,
+                t.price_per_share,
+                t.total_amount,
+                t.transaction_date
+            FROM transactions t
+            JOIN users u ON t.user_id = u.user_id
+            JOIN stocks s ON t.stock_id = s.stock_id
+            ORDER BY t.transaction_date DESC
+            LIMIT 10
+        `);
 
-    console.log("Connected to Neon successfully!");
-    console.log("Database:", result.rows[0].database);
-    console.log("Time:", result.rows[0].connected_at);
-  } catch (error) {
-    console.error("Database connection failed:", error.message);
-  } finally {
-    await pool.end();
-  }
+        console.table(result.rows);
+    } catch (error) {
+        console.error("Query failed:", error.message);
+    } finally {
+        await pool.end();
+    }
 }
 
-testConnection();
+checkTransactions();
