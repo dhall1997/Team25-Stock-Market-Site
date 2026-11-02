@@ -234,14 +234,38 @@ function updateStockDropdown() {
 
     stockSelect.innerHTML = '<option value="">Select a stock</option>';
 
-    stocks.forEach((stock) => {
+    // Include all active stocks.
+    const availableStocks = stocks.map((stock) => ({
+        ...stock,
+        isActive: true
+    }));
+
+    // Include inactive stocks if the customer still owns shares.
+    Object.keys(portfolio).forEach((ticker) => {
+        if (
+            portfolio[ticker] > 0 &&
+            !availableStocks.some((stock) => stock.ticker === ticker)
+        ) {
+            availableStocks.push({
+                ticker: ticker,
+                company: ticker,
+                isActive: false
+            });
+        }
+    });
+
+    availableStocks.forEach((stock) => {
         const option = document.createElement('option');
         option.value = stock.ticker;
-        option.textContent = `${stock.company} (${stock.ticker})`;
+
+        option.textContent = stock.isActive
+            ? `${stock.company} (${stock.ticker})`
+            : `${stock.ticker} (Inactive - owned)`;
+
         stockSelect.appendChild(option);
     });
 
-    if (stocks.some((stock) => stock.ticker === selectedValue)) {
+    if (availableStocks.some((stock) => stock.ticker === selectedValue)) {
         stockSelect.value = selectedValue;
     }
 
@@ -467,7 +491,8 @@ async function loadAccountData() {
 
         updatePortfolio();
         updateTransactions();
-
+        updateStockDropdown();      
+        
     } catch (error) {
         console.error("Account data error:", error);
         tradeMessage.textContent = error.message;

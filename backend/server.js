@@ -335,6 +335,7 @@ app.get("/stocks", async (req, res) => {
                    opening_price, current_price,
                    daily_high, daily_low
             FROM stocks
+            WHERE is_active = TRUE
             ORDER BY ticker
         `);
 
@@ -359,7 +360,174 @@ app.get("/stocks", async (req, res) => {
         console.error("Unable to retrieve stocks:", error.message);
 
         res.status(500).json({
-            error: "Unable to retrieve stocks from the database."
+        error: "Unable to retrieve stocks from the database."
+        });
+    }
+});
+
+// -------------------------------
+// EDIT STOCK (ADMIN ONLY)
+// -------------------------------
+
+app.put("/admin/stocks/:id", requireAdmin, async (req, res) => {
+    const stockId = Number(req.params.id);
+    const { company, ticker, volume, price } = req.body;
+
+    if (
+        !Number.isSafeInteger(stockId) ||
+        stockId <= 0 ||
+        typeof company !== "string" ||
+        !company.trim() ||
+        typeof ticker !== "string" ||
+        !/^[A-Za-z]{1,10}$/.test(ticker.trim()) ||
+        !Number.isSafeInteger(Number(volume)) ||
+        Number(volume) <= 0 ||
+        !Number.isFinite(Number(price)) ||
+        Number(price) <= 0
+    ) {
+        return res.status(400).json({
+            error: "Enter valid stock information."
+        });
+    }
+
+    try {
+        const result = await pool.query(
+            `UPDATE stocks
+             SET company = $1,
+                 ticker = $2,
+                 volume = $3,
+                 current_price = $4
+             WHERE stock_id = $5
+             RETURNING stock_id, company, ticker, volume,
+                       opening_price, current_price,
+                       daily_high, daily_low, is_active`,
+            [
+                company.trim(),
+                ticker.trim().toUpperCase(),
+                Number(volume),
+                Math.round(Number(price) * 100) / 100,
+                stockId
+            ]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                error: "Stock not found."
+            });
+        }
+
+        const stock = result.rows[0];
+
+        res.json({
+            stockId: stock.stock_id,
+            company: stock.company,
+            ticker: stock.ticker,
+            volume: Number(stock.volume),
+            openingPrice: Number(stock.opening_price),
+            price: Number(stock.current_price),
+            high: Number(stock.daily_high),
+            low: Number(stock.daily_low),
+            isActive: stock.is_active
+        });
+
+    } catch (error) {
+        if (error.code === "23505") {
+            return res.status(409).json({
+                error: "That ticker already exists."
+            });
+        }
+
+        console.error("Unable to update stock:", error.message);
+
+                res.status(500).json({
+            error: "Unable to update stock."
+        });
+    }
+});
+
+// -------------------------------
+// ACTIVATE OR DEACTIVATE STOCK
+// -------------------------------
+
+app.patch("/admin/stocks/:id/status", requireAdmin, async (req, res) => {
+    const stockId = Number(req.params.id);
+    const { isActive } = req.body;
+
+    if (
+        !Number.isSafeInteger(stockId) ||
+        stockId <= 0 ||
+        typeof isActive !== "boolean"
+    ) {
+        return res.status(400).json({
+            error: "Invalid stock status."
+        });
+    }
+
+    try {
+        const result = await pool.query(
+            `UPDATE stocks
+             SET is_active = $1
+             WHERE stock_id = $2
+             RETURNING stock_id, company, ticker, is_active`,
+            [isActive, stockId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                error: "Stock not found."
+            });
+        }
+
+        res.json({
+            message: "Stock status updated.",
+            stockId: result.rows[0].stock_id,
+            company: result.rows[0].company,
+            ticker: result.rows[0].ticker,
+            isActive: result.rows[0].is_active
+        });
+
+    } catch (error) {
+        console.error("Unable to update stock status:", error.message);
+
+        res.status(500).json({
+            error: "Unable to update stock status."
+        });
+    }
+});
+
+// -------------------------------
+// GET STOCKS FOR ADMIN
+// -------------------------------
+
+app.get("/admin/stocks", requireAdmin, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT stock_id, company, ticker, volume,
+                   opening_price, current_price,
+                   daily_high, daily_low, is_active
+            FROM stocks
+            ORDER BY ticker
+        `);
+
+        const stockList = result.rows.map(stock => ({
+            stockId: stock.stock_id,
+            company: stock.company,
+            ticker: stock.ticker,
+            volume: Number(stock.volume),
+            openingPrice: Number(stock.opening_price),
+            price: Number(stock.current_price),
+            high: Number(stock.daily_high),
+            low: Number(stock.daily_low),
+            isActive: stock.is_active
+        }));
+
+        res.json(stockList);
+
+    } catch (error) {
+        console.error("Unable to retrieve admin stocks:", error.message);
+
+        res.status(500).json({
+            error: "Unable to retrieve stocks."
         });
     }
 });
@@ -565,6 +733,7 @@ app.post("/trade/buy", requireLogin, async (req, res) => {
                     current_price * $2 AS total
              FROM stocks
              WHERE ticker = $1
+               AND is_active = TRUE
              FOR SHARE`,
             [ticker.trim().toUpperCase(), shares]
         );
@@ -575,8 +744,10 @@ app.post("/trade/buy", requireLogin, async (req, res) => {
 
         const stock = stockResult.rows[0];
 
-        if (Number(userResult.rows[0].cash_balance) <
-            Number(stock.total)) {
+        if (
+            Number(userResult.rows[0].cash_balance) <
+            Number(stock.total)
+        ) {
             throw new Error("Not enough cash to complete this purchase.");
         }
 
@@ -603,8 +774,13 @@ app.post("/trade/buy", requireLogin, async (req, res) => {
                 (user_id, stock_id, transaction_type,
                  shares, price_per_share, total_amount)
              VALUES ($1, $2, 'buy', $3, $4, $5)`,
-            [userId, stock.stock_id, shares,
-             stock.current_price, stock.total]
+            [
+                userId,
+                stock.stock_id,
+                shares,
+                stock.current_price,
+                stock.total
+            ]
         );
 
         await client.query("COMMIT");
@@ -634,6 +810,7 @@ app.post("/trade/buy", requireLogin, async (req, res) => {
         client.release();
     }
 });
+
 
 // -------------------------------
 // SELL STOCK
@@ -685,7 +862,8 @@ app.post("/trade/sell", requireLogin, async (req, res) => {
         const holdingResult = await client.query(
             `SELECT shares_owned
              FROM portfolio_holdings
-             WHERE user_id = $1 AND stock_id = $2
+             WHERE user_id = $1
+               AND stock_id = $2
              FOR UPDATE`,
             [userId, stock.stock_id]
         );
@@ -694,13 +872,16 @@ app.post("/trade/sell", requireLogin, async (req, res) => {
             holdingResult.rows.length === 0 ||
             holdingResult.rows[0].shares_owned < shares
         ) {
-            throw new Error("You do not own enough shares to complete this sale.");
+            throw new Error(
+                "You do not own enough shares to complete this sale."
+            );
         }
 
         await client.query(
             `UPDATE portfolio_holdings
              SET shares_owned = shares_owned - $1
-             WHERE user_id = $2 AND stock_id = $3`,
+             WHERE user_id = $2
+               AND stock_id = $3`,
             [shares, userId, stock.stock_id]
         );
 
@@ -724,8 +905,13 @@ app.post("/trade/sell", requireLogin, async (req, res) => {
                 (user_id, stock_id, transaction_type,
                  shares, price_per_share, total_amount)
              VALUES ($1, $2, 'sell', $3, $4, $5)`,
-            [userId, stock.stock_id, shares,
-             stock.current_price, stock.total]
+            [
+                userId,
+                stock.stock_id,
+                shares,
+                stock.current_price,
+                stock.total
+            ]
         );
 
         await client.query("COMMIT");
